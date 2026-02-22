@@ -31,7 +31,7 @@ jobs:
           for i in {1..20}
           do
             echo "Crawler iteration $i"
-            Rscript download_steamspy.R
+            Rscript scripts/acquisition/download_steamspy.R
 
             PROGRESS=$(cat data/temp/progress.txt)
             echo "Progress = $PROGRESS"
