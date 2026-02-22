@@ -1,0 +1,7 @@
+temp_read <- read.csv(
+  here::here(
+    "data",
+    "raw",
+    "steamspy_snapshot_2026-02-22.csv.gz"
+  )
+)

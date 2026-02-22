@@ -1,0 +1,48 @@
+library(here)
+
+message("Starting full SteamSpy crawl")
+
+complete_flag <- here(
+  "data","temp","crawl_complete.txt"
+)
+
+repeat {
+  
+  # -----------------------------
+  # Run crawler batch
+  # -----------------------------
+  source(
+    here(
+      "scripts",
+      "acquisition",
+      "download_pages.R"
+    ),
+    local = TRUE
+  )
+  
+  # -----------------------------
+  # Check completion
+  # -----------------------------
+  if (file.exists(complete_flag)) {
+    message("Crawl finished!")
+    break
+  }
+  
+  message("Continuing next batch...")
+}
+
+# -----------------------------
+# Build snapshot automatically
+# -----------------------------
+message("Building snapshot...")
+
+source(
+  here(
+    "scripts",
+    "processing",
+    "build_snapshot.R"
+  ),
+  local = TRUE
+)
+
+message("Full crawl completed successfully.")

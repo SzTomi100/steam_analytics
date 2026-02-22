@@ -1,0 +1,51 @@
+name: Daily Steam Crawl
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install packages
+        run: |
+          Rscript -e 'install.packages(c(
+            "jsonlite",
+            "dplyr",
+            "purrr",
+            "DBI",
+            "RSQLite",
+            "here"
+          ))'
+
+      - name: Run crawler repeatedly
+        run: |
+          for i in {1..20}
+          do
+            echo "Crawler iteration $i"
+            Rscript download_steamspy.R
+
+            PROGRESS=$(cat data/temp/progress.txt)
+            echo "Progress = $PROGRESS"
+
+            if [ "$PROGRESS" = "0" ]; then
+              echo "Full crawl completed."
+              break
+            fi
+          done
+
+      - name: Commit updated database
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add data/
+          git commit -m "Daily Steam update" || echo "No changes"
+          git push

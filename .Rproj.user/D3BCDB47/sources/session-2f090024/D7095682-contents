@@ -1,0 +1,58 @@
+library(dplyr)
+library(here)
+
+complete_flag <- here(
+  "data","temp","crawl_complete.txt"
+)
+
+if(!file.exists(complete_flag)){
+  message("Crawl not finished yet.")
+  quit(save="no")
+}
+
+message("Building full snapshot...")
+
+files <- list.files(
+  here("data","pages"),
+  full.names = TRUE
+)
+
+steam_full <- bind_rows(
+  lapply(files, read.csv)
+)
+
+snapshot_name <- paste0(
+  "steamspy_snapshot_",
+  Sys.Date(),
+  ".csv.gz"
+)
+
+snapshot_path <- here(
+  "data","raw",
+  snapshot_name
+)
+
+write.csv(
+  steam_full,
+  gzfile(snapshot_path),
+  row.names = FALSE
+)
+
+message("Snapshot saved:")
+message(snapshot_path)
+
+# ----------------------------
+# RESET SYSTEM
+# ----------------------------
+
+unlink(here("data","pages"), recursive=TRUE)
+dir.create(here("data","pages"))
+
+unlink(complete_flag)
+
+writeLines(
+  "0",
+  here("data","temp","progress.txt")
+)
+
+message("System reset for next crawl.")
